@@ -8,7 +8,9 @@
 		"Gruntfile.js",
 		"package.json",
 		".gitignore",
-		".git/*"
+		".git/*",
+		"LICENSE",
+		"README"
 	],
 	"main": [
 		"pingr.js",
