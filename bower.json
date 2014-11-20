@@ -1,0 +1,17 @@
+{
+	"name": "pingr",
+	"version": "0.0.1",
+	"dependencies": {
+		"angular": "~1.2.23"
+	},
+	"ignore": [
+		"Gruntfile.js",
+		"package.json",
+		".gitignore",
+		".git/*"
+	],
+	"main": [
+		"pingr.js",
+		"pingr.min.js"
+	]
+}
