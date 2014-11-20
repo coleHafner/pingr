@@ -1,4 +1,4 @@
-angular.module('pingr')
+angular.module('pingr', [])
 
 .service('pingr', [
 	'$http',
@@ -16,9 +16,9 @@ function(
 		intervalPromise: null,
 		opts: {
 			message: 'There are new updates available. Do you want to reload?',
-			interval: '60',
+			interval: 60,
 			endpoint: '',
-			retry: '300'
+			retry: 300
 		},
 		init: function(opts) {
 
