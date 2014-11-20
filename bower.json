@@ -1,6 +1,7 @@
 {
 	"name": "pingr",
 	"version": "0.0.1",
+	"private": false,
 	"dependencies": {
 		"angular": "~1.2.23"
 	},
