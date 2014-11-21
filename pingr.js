@@ -18,14 +18,15 @@ function(
 			message: 'There are new updates available. Do you want to reload?',
 			interval: 60,
 			endpoint: '',
-			retry: 300
+			retry: 300,
+			onChange: null,
+			replyKey: null
 		},
 		init: function(opts) {
 
 			//override default opts
-			for (var key in opts) {
-				this.opts[key] = opts[key];
-			}
+			angular.extend(this.opts, opts);
+			console.log('opts', this.opts);
 
 			if (!this.opts.endpoint) {
 				throw new Error('Endpoint is required.');
@@ -37,22 +38,35 @@ function(
 
 			var msDelay = this.opts.interval * 1000;
 
+			//do intial ping
+			this.ping();
+
 			this.intervalPromise = $interval(function() {
 				pingr.ping();
 			}, msDelay);
 		},
 		ping: function() {
 
-			$http.post(this.opts.endpoint).then(function(r) {
+			$http.get(this.opts.endpoint).then(function(r) {
 
 				var current = null;
 
-				for (var k in r.data) {
-					if (typeof k !== 'function') {
-						current = r.data[k];
-						break;
+				if (typeof r.data === 'string') {
+					current = r.data;
+
+				}else if(pingr.opts.replyKey !== null) {
+					current = r.data[pingr.opts.replyKey];
+					console.log('customKey');
+				}else {
+					for (var k in r.data) {
+						if (typeof k !== 'function') {
+							current = r.data[k];
+							break;
+						}
 					}
 				}
+
+				console.log('picked val:', current);
 
 				if (current === null) {
 					throw new Error('Pingr could not interpret response from endpoint "' + this.opts.endpoint + '"');
@@ -67,16 +81,24 @@ function(
 					return;
 				}
 
-				pingr.reload();
+				pingr.onChange(r);
 
 			}, function(r) {
 				console.log('Pingr failure reply:', r);
 				throw new Error('Pingr could not reach endpoint "' + this.opts.endpoint + '"');
 			});
 		},
+		onChange: function(reply) {
+			if (typeof this.opts.onChange === 'function') {
+				this.opts.onChange(reply, this);
+				return;
+			}
+
+			this.reload();
+		},
 		reload: function() {
 			if (!$window.confirm(this.opts.message)) {
-				$interval.cancel(this.intervalPromise);
+				this.cancel();
 
 				if (this.opts.retry !== false) {
 					var msRetry = this.opts.retry * 1000;
@@ -88,6 +110,9 @@ function(
 			}
 
 			$window.location.reload();
+		},
+		cancel: function() {
+			$interval.cancel(this.intervalPromise);
 		}
 	};
 
