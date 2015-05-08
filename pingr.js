@@ -18,7 +18,9 @@ function(
 			message: 'There are new updates available. Do you want to reload?',
 			interval: 60,
 			endpoint: '',
-			retry: 300
+			retry: 300,
+			messageHandler: null, 
+			debug: false
 		},
 		init: function(opts) {
 
@@ -42,7 +44,7 @@ function(
 			}, msDelay);
 		},
 		ping: function() {
-
+			var that = this;
 			$http.post(this.opts.endpoint).then(function(r) {
 
 				var current = null;
@@ -55,7 +57,7 @@ function(
 				}
 
 				if (current === null) {
-					throw new Error('Pingr could not interpret response from endpoint "' + this.opts.endpoint + '"');
+					throw new Error('Pingr could not interpret response from endpoint "' + that.opts.endpoint + '"');
 				}
 
 				if (pingr.cached === null) {
@@ -63,7 +65,7 @@ function(
 					return;
 				}
 
-				if (pingr.cached === current) {
+				if (pingr.cached === current && that.opts.debug === false) {
 					return;
 				}
 
@@ -75,6 +77,12 @@ function(
 			});
 		},
 		reload: function() {
+			
+			if (this.opts.messageHandler !== null) { 
+				this.opts.messageHandler(this.opts.message);
+				return;
+			}
+			
 			if (!$window.confirm(this.opts.message)) {
 				$interval.cancel(this.intervalPromise);
 
